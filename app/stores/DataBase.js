@@ -1,3 +1,4 @@
+require('dotenv').load();
 var mongoose = require('mongoose');
 var q        = require('q');
 mongoose.Promise = q.Promise;
@@ -14,9 +15,11 @@ module.exports = {
 	  }
 	  return dbInstance;
 	},
-	onConnectionSuccess: function(app) {
+	onConnectionSuccess: function() {
 		console.log("DB connection ................ OK ");
 	},
 	onConnectionFailed: function(err) {
 		console.log("DB connection ................ FAIL ");
+		exit(1);
 	}
+};

@@ -1,16 +1,22 @@
-var express     = require('express');
-var session     = require('express-session')
+require('dotenv').load();
+var express     	= require('express');
+var session     	= require('express-session')
 
-var app         = express();
-var bodyParser  = require('body-parser');
-var morgan      = require('morgan');
+var app         	= express();
+var bodyParser  	= require('body-parser');
+var morgan      	= require('morgan');
 
 var configure     = require('./configure.js');
-var connectDB     = require('./app/stores/connectDB.js');
-
-var port = process.env.PORT || 8080;
+var DBstore     	= require('./app/stores/DataBase.js');
 
 //api routes
+var WikiRoutes 		= require('./app/routes/WikiRoutes.js');
+
+//services
+var WikiService 	= require('./app/services/WikiService.js');
+var WikiFetch 		= require('./app/services/WikipediaFetch.js');
+
+var port = process.env.PORT || 8080;
 
 
 // use body parser so we can get info from POST and/or URL parameters
@@ -21,18 +27,15 @@ app.use(bodyParser.json());
 app.use(morgan('dev'));
 
 // connect to db
-var dbInstance = connectDB();
-dbInstance.on('error', function() {
-      console.log("connection error");
-      exit(1);
-  });
-
-dbInstance.once("open", function() {
-    console.log("DB connection ................ OK ");
-    authRoutes(app);
-    todoRoutes(app);
-    userRoutes(app);
-});
+var dbInstance = DBstore.connect();
+if ( dbInstance ) {
+	dbInstance.on('error', DBstore.onConnectionFailed);
+	dbInstance.once("open", function() {
+		DBstore.onConnectionSuccess();
+		WikiRoutes(app);
+		WikiFetch();
+	});
+}
 
 
 
