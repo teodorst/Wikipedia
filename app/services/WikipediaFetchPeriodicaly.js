@@ -66,17 +66,17 @@ var months = [
 ];
 
 // regex rulles to match lines
-var characters = '\\s\u00C0-\u017F\\w\\:\\&\|\';\.\(\),\!\-';
+var characters = '–\\s\u00C0-\u1EF9\\w\\:\\&\|\';\.\(\),\!\-';
 var linkYear = '\\s*\\[\\[[0-9\\sBC]+\\]\\]\\s*';
 var year = '\\s*[0-9\\sBC]+\\s*';
-var linkWord = '\\s*(['+ characters + '\\[\\]]+,*\\s*)*';
+var linkWord = '\\s*(['+ characters + '\\{\\}\\[\\]]+,*\\s*)*';
 var word = '\\s*[' + characters + ']+\\s*';
 var categoryRegexPattern = new RegExp('==(' + word + ')==');
 var entryRegexPattern = new RegExp('\\*('+ linkYear + '|' + year + ')&ndash;'
 	+ '(' + linkWord + '|' + word + ')+');
 var holidayRegexPattern = new RegExp('(\\*+)(' + linkWord + ')+');
-var extraLinkDescription = new RegExp('\\[[^\\]]+\\|','ig');
-var bracketsRemove = new RegExp('[\\[\\]\\*]+','ig');
+var extraLinkDescription = new RegExp('(\\[[^\\]]+\\|)|(\\{[^\\}]+\\|)','ig');
+var bracketsRemove = new RegExp('[\\{\\}\\[\\]\\*]+','ig');
 var removeWhiteSpaces = new RegExp('\\s', 'g');
 var removeDash = new RegExp('&ndash', 'g');
 

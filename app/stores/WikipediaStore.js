@@ -25,20 +25,36 @@ var createQueryObject = function(day, year, keyword) {
 var wikipediaStore = {
 	insertInCategory: function(category, title, day, time, year) {
 		if (year) {
-			return collections[category].save({
+			return collections[category].update({
+				title: title,
+				category: category
+			},
+			{
 				title: title,
 				day: day,
 				year: year,
 				category: category,
 				updated: time
-			});
+			},
+			{
+				upsert: true
+			}
+		);
 		} else {
-			return collections[category].save({
+			return collections[category].update({
+				title: title,
+				category: category
+			},
+			{
 				title: title,
 				day: day,
 				category: category,
 				updated: time
-			});
+			},
+			{
+				upsert:true
+			}
+		);
 		}
 	},
 	findInCategory: function(category, day, year, keyword) {
