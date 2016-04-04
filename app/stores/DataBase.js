@@ -1,25 +1,34 @@
 require('dotenv').load();
-var mongoose = require('mongoose');
-var q        = require('q');
-mongoose.Promise = q.Promise;
+var MongoClient 		= require('mongodb').MongoClient;
+var q        				= require('q');
 
 var dbInstance;
 
 module.exports = {
 	connect: function( url ) {
 	  url = url || process.env.DB_URL;
-	  if( !dbInstance && url ) {
-	    mongoose.connect(url);
-	    dbInstance = mongoose.connection;
-	    return dbInstance;
-	  }
-	  return dbInstance;
+		return new Promise(function(resolve, reject) {
+			if( !dbInstance && url ) {
+				MongoClient.connect(url)
+					.then(function(db) {
+						console.log("DB connection ................ OK ");
+						dbInstance = db;
+						resolve(db);
+					})
+					.catch(function(err){
+						console.log("DB connection ................ FAIL ");
+						reject(err);
+					});
+			}
+			else {
+				resolve(dbInstance);
+			}
+		});
 	},
-	onConnectionSuccess: function() {
-		console.log("DB connection ................ OK ");
+	getDBInstance: function() {
+		return dbInstance;
 	},
-	onConnectionFailed: function(err) {
-		console.log("DB connection ................ FAIL ");
-		exit(1);
+	closeConnection: function(force) {
+		dbInstance.close(force);
 	}
 };

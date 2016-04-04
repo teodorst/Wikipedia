@@ -1,17 +1,14 @@
 var bot 							= require('nodemw');
 var WikipediaStore 		= require('../stores/WikipediaStore.js');
 var db 								= require('../stores/DataBase.js');
-var EventEmitter 			= require('events');
 
-console.log(EventEmitter);
-
-var minutes = 120, interval = minutes * 60 * 1000;
+var minutes = 120, fetchInterval = minutes * 60 * 1000;
 
 // WIkipedia connection client
 var client = new bot({
 	server: 'en.wikipedia.org',  // host name of MediaWiki-powered site
 	path: '/w',                  // path to api.php script
-	debug: true                 // is more verbose when set to true
+	debug: false                 // is more verbose when set to true
 });
 
 
@@ -68,7 +65,6 @@ var months = [
 	}
 ];
 
-
 // regex rulles to match lines
 var characters = '\\s\u00C0-\u017F\\w\\:\\&\|\';\.\(\),\!\-';
 var linkYear = '\\s*\\[\\[[0-9\\sBC]+\\]\\]\\s*';
@@ -87,8 +83,15 @@ var removeDash = new RegExp('&ndash', 'g');
 var currentCategory = undefined;
 var currentDay;
 
+var getCurrentTime = function(){
+  return new Date().getTime();
+}
+
 var getAllPages = function() {
+	var time = getCurrentTime();
+	currentCategory = undefined;
 	var day;
+
 	for (var index in months) {
 		for (day = 1; day <= months[index].monthDaysNumber; day ++) {
 			var monthDay = months[index].monthName.concat('_', day);
@@ -100,33 +103,27 @@ var getAllPages = function() {
 			      console.error(err);
 			      return err;
 			    }
-					processResponse(data, monthDay);
+					processResponse(data, monthDay, time);
 				}
 			);
 		}
 	}
-	console.log('gata');
 };
 
-var getPage = function(day) {
-
-}
-
-
-var processResponse = function(text, day) {
+var processResponse = function(text, day, time) {
 	textLines = text.split('\n');
 	for (var lineIndex in textLines) {
-			parseLine(textLines[lineIndex], day);
+			parseLine(textLines[lineIndex], day, time);
 	}
 };
 
-var parseLine = function(line, day) {
+var parseLine = function(line, day, time) {
 	var matches = categoryRegexPattern.exec(line);
 	// it might be a category
 	if (matches) {
 		var readCategory = matches[1].replace(removeWhiteSpaces, '');
 		if (categories.indexOf(readCategory) > -1) {
-			currentCategory = readCategory; // another strinng
+			currentCategory = readCategory.toLowerCase(); // another strinng
 			//console.log("New Category:", currentCategory);
 		} else {
 			currentCategory = undefined;
@@ -138,32 +135,26 @@ var parseLine = function(line, day) {
 		}
 		matches = entryRegexPattern.exec(line);
 		if (matches !== null && currentCategory) {
-			dbStore.saveEntry(
-				currentCategory,
-				matches[2].replace(extraLinkDescription, '[[')
-					.replace(bracketsRemove, '').replace('&ndash', '-').trim(),
-				day,
-				matches[1].replace(bracketsRemove, '').replace(removeWhiteSpaces, '').trim()
-			).then(function(data) {
-					console.log("Insert complete");
-				})
+			var year = matches[1].replace(bracketsRemove, '')
+				.replace(removeWhiteSpaces, '').trim();
+			var title = matches[2].replace(extraLinkDescription, '[[')
+				.replace(bracketsRemove, '').replace('&ndash', '-').trim();
+
+			dbStore.insertInCategory(currentCategory, title, day, time, year)
 				.catch(function(error) {
-					console.log("Insert Failed!", err);
+					//console.log("Insert Failed!", error);
 				});
+
 		} else {
 			// it might be a Holidays and Observances entry
 			matches = holidayRegexPattern.exec(line);
 			if (matches !== null && currentCategory) {
-				//console.log(	"MATCH", currentCategory, matches);
-				dbStore.saveEntry(
-					currentCategory,
-					matches[2].replace(extraLinkDescription,'[[')
-						.replace(bracketsRemove, '').replace(removeDash, '-'),
-					day
-				).then(function(data) {
-					console.log("Insert Complete!");
-				}).catch(function(error) {
-					console.log("Insert Failed!", err);
+				var title = matches[2].replace(extraLinkDescription, '[[')
+					.replace(bracketsRemove, '').replace('&ndash', '-').trim();
+
+				dbStore.insertInCategory(currentCategory, title, day, time)
+				.catch(function(error) {
+					//console.log("Insert Failed!", error);
 				});
 			}
 		}
@@ -171,50 +162,34 @@ var parseLine = function(line, day) {
 };
 
 if (!module.parent) {
-	
-	nextDayEmitter = new EventEmitter();
-	nextDayEmitter.on('nextDay', function	(){
-		console.log('nextDay');
-	})
-
-	nextDayEmitter.emit('nextDay');
 
 	db.connect()
 		.then(function(dbInstance) {
 			dbStore = WikipediaStore(dbInstance);
-			client.getArticle('December_31', function(err, data) {
-		    // error handling
-		    if (err) {
-		      console.error(err);
-		      return;
-		    }
-				processResponse(data, 'December_31');
-			});
+
+			setInterval(getAllPages, fetchInterval);
 		})
 		.catch(function(err){
+			console.log('Can\'t connect to DB! Exiting ... ');
 			process.exit(127);
 		});
 } else {
 	module.exports = function(db) {
 		dbStore = WikipediaStore(db);
-		dbStore.clearCollections();
+		//dbStore.clearCollections();
+		//getAllPages();
+		client.getArticle(
+			'March_13',
+			function(err, data) {
+				// error handling
+				if (err) {
+					console.error(err);
+					return err;
+				}
+				processResponse(data, 'March_13', 1243214321.00);
+			}
+		);
 
-		//getAllPages(client);
-		client.getArticle('March_13', function(err, data) {
-	    // error handling
-	    if (err) {
-	      console.error(err);
-	      return err;
-	    }
-			processResponse(data, 'March_13');
-			dbStore.queryByKeyword('is', 'Events')
-			.then(function(data){
-				//console.log(data);
-			})
-			.catch(function(err){
-				console.log(err);
-			});
-		});
-
+		setInterval(getAllPages, fetchInterval);
 	};
 }

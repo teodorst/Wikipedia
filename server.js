@@ -14,7 +14,7 @@ var WikiRoutes 		= require('./app/routes/WikiRoutes.js');
 
 //services
 var WikiService 	= require('./app/services/WikiService.js');
-var WikiFetch 		= require('./app/services/WikipediaFetch.js');
+var WikiFetch 		= require('./app/services/WikipediaFetchPeriodicaly.js');
 
 var port = process.env.PORT || 8080;
 
@@ -27,18 +27,14 @@ app.use(bodyParser.json());
 app.use(morgan('dev'));
 
 // connect to db
-var dbInstance = DBstore.connect();
-if ( dbInstance ) {
-	dbInstance.on('error', DBstore.onConnectionFailed);
-	dbInstance.once("open", function() {
-		DBstore.onConnectionSuccess();
+DBstore.connect()
+	.then(function(dbInstance) {
 		WikiRoutes(app);
-		WikiFetch();
+		WikiFetch(dbInstance);
+	})
+	.catch(function(err) {
+		console.log(err);
 	});
-}
-
-
 
 app.listen(port);
-
 console.log('Magic happens at http://localhost:' + port);
