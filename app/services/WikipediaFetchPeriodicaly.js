@@ -8,7 +8,7 @@ var minutes = 120, fetchInterval = minutes * 60 * 1000;
 var client = new bot({
 	server: 'en.wikipedia.org',  // host name of MediaWiki-powered site
 	path: '/w',                  // path to api.php script
-	debug: false                 // is more verbose when set to true
+	debug: true                 // is more verbose when set to true
 });
 
 
@@ -100,10 +100,12 @@ var getAllPages = function() {
 				function(err, data) {
 			    // error handling
 			    if (err) {
-			      console.error(err);
+			      console.log('Error Downloading a page');
 			      return err;
 			    }
-					processResponse(data, monthDay, time);
+					else {
+						processResponse(data, monthDay, time);
+					}
 				}
 			);
 		}
@@ -124,7 +126,6 @@ var parseLine = function(line, day, time) {
 		var readCategory = matches[1].replace(removeWhiteSpaces, '');
 		if (categories.indexOf(readCategory) > -1) {
 			currentCategory = readCategory.toLowerCase(); // another strinng
-			//console.log("New Category:", currentCategory);
 		} else {
 			currentCategory = undefined;
 		}
@@ -142,7 +143,7 @@ var parseLine = function(line, day, time) {
 
 			dbStore.insertInCategory(currentCategory, title, day, time, year)
 				.catch(function(error) {
-					//console.log("Insert Failed!", error);
+					console.log("Insert in db Failed!", error);
 				});
 
 		} else {
@@ -154,7 +155,7 @@ var parseLine = function(line, day, time) {
 
 				dbStore.insertInCategory(currentCategory, title, day, time)
 				.catch(function(error) {
-					//console.log("Insert Failed!", error);
+					console.log("Insert in db Failed!", error);
 				});
 			}
 		}
@@ -176,19 +177,7 @@ if (!module.parent) {
 } else {
 	module.exports = function(db) {
 		dbStore = WikipediaStore(db);
-		//dbStore.clearCollections();
-		//getAllPages();
-		client.getArticle(
-			'March_13',
-			function(err, data) {
-				// error handling
-				if (err) {
-					console.error(err);
-					return err;
-				}
-				processResponse(data, 'March_13', 1243214321.00);
-			}
-		);
+		getAllPages();
 
 		setInterval(getAllPages, fetchInterval);
 	};

@@ -6,6 +6,8 @@ var EventEmitter 			= require('events');
 console.log(EventEmitter);
 
 var minutes = 120, interval = minutes * 60 * 1000;
+var eventEmitter = new EventEmitter();
+
 
 // WIkipedia connection client
 var client = new bot({
@@ -90,37 +92,17 @@ var getCurrentTime = function(){
   return new Date().getTime();
 }
 
-// var getAllPages = function() {
-// 	var day;
-// 	for (var index in months) {
-// 		for (day = 1; day <= months[index].monthDaysNumber; day ++) {
-// 			var monthDay = months[index].monthName.concat('_', day);
-// 			client.getArticle(
-// 				monthDay,
-// 				function(err, data) {
-// 			    // error handling
-// 			    if (err) {
-// 			      console.error(err);
-// 			      return err;
-// 			    }
-// 					processResponse(data, monthDay);
-// 				}
-// 			);
-// 		}
-// 	}
-// 	console.log('gata');
-// };
-
-var getPage = function(monthDay, time, eventEmitter) {
+var getPage = function(monthDay, time) {
 	client.getArticle(
 		monthDay,
 		function(err, data) {
 			// error handling
 			if (err) {
-				console.error(err);
+				console.error(monthDay + ' Download Failed');
+				eventEmitter.emit('nextDay');
 				return err;
 			}
-			processResponse(data, time, monthDay, eventEmitter);
+			processResponse(data, time, monthDay);
 		}
 	);
 }
@@ -185,7 +167,6 @@ var parseLine = function(line, day, time, promises) {
 
 if (!module.parent) {
 
-	var eventEmitter = new EventEmitter();
 	var dbInstance;
 	var currentDay = 0, currentMonth = months[0].monthName, monthIndex = 0;
 	var _that = this;
@@ -208,7 +189,7 @@ if (!module.parent) {
 		else {
 			currentDay ++;
 		}
-		getPage(currentMonth + '_' + currentDay, eventEmitter);
+		getPage(currentMonth + '_' + currentDay);
 	});
 
 	eventEmitter.on('fetchCompleted', function() {
