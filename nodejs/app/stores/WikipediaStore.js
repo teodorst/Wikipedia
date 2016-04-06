@@ -82,12 +82,6 @@ var wikipediaStore = {
 						console.log('AFTER DELETE:', queryObj);
 					}
 					promises.push(collections[key].find(queryObj).toArray());
-						// .then(function(data) {
-						// 	results = results.concat(data);
-						// })
-						// .catch(function(){
-						// 	console.log("Error searching in " + key);
-						// });
 				}
 			}
 			Promise.all(promises)
@@ -112,7 +106,9 @@ var wikipediaStore = {
 
 
 module.exports = function(dbInstance) {
-	if (dbInstance && !collections)
+	if (dbInstance && !collections) {
 		collections = WikipediaCollections(dbInstance);
+	}
+
 	return wikipediaStore;
 };

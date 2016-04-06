@@ -1,19 +1,14 @@
 var bot 							= require('nodemw');
 var WikipediaStore 		= require('../stores/WikipediaStore.js');
 var db 								= require('../stores/DataBase.js');
-var EventEmitter 			= require('events');
 
-console.log(EventEmitter);
-
-var minutes = 120, interval = minutes * 60 * 1000;
-var eventEmitter = new EventEmitter();
-
+var minutes = 120, fetchInterval = minutes * 60 * 1000;
 
 // WIkipedia connection client
 var client = new bot({
 	server: 'en.wikipedia.org',  // host name of MediaWiki-powered site
 	path: '/w',                  // path to api.php script
-	debug: false                 // is more verbose when set to true
+	debug: true                 // is more verbose when set to true
 });
 
 
@@ -70,7 +65,6 @@ var months = [
 	}
 ];
 
-
 // regex rulles to match lines
 var characters = '–\\s\u00C0-\u1EF9\\w\\:\\&\|\';\.\(\),\!\-';
 var linkYear = '\\s*\\[\\[[0-9\\sBC]+\\]\\]\\s*';
@@ -87,6 +81,7 @@ var removeWhiteSpaces = new RegExp('\\s', 'g');
 var removeDash = new RegExp('&ndash', 'g');
 
 var currentCategory = undefined;
+var currentDay;
 
 var getCurrentTime = function(){
   return new Date().getTime();
@@ -97,35 +92,39 @@ var getPage = function(monthDay, time) {
 		monthDay,
 		function(err, data) {
 			// error handling
+			console.log('monthDay', monthDay);
 			if (err) {
-				console.error(monthDay + ' Download Failed');
-				eventEmitter.emit('nextDay');
+				console.log('Error Downloading a page');
 				return err;
 			}
-			processResponse(data, time, monthDay);
+			else {
+				processResponse(data, monthDay, time);
+			}
 		}
 	);
-}
-
-var processResponse = function(text, time, day) {
-	var promises = [];
-	textLines = text.split('\n');
-	for (var lineIndex in textLines) {
-			parseLine(textLines[lineIndex], day, time, promises);
-	}
-	Promise.all(promises)
-		.then(function(data){
-			console.log(day + " completed");
-			eventEmitter.emit('nextDay');
-		})
-		.catch(function(err) {
-			console.log(day + " failed");
-			console.log(err);
-			eventEmitter.emit('nextDay');
-		})
 };
 
-var parseLine = function(line, day, time, promises) {
+var getAllPages = function() {
+	var time = getCurrentTime();
+	currentCategory = undefined;
+	var day;
+
+	for (var index in months) {
+		for (day = 1; day <= months[index].monthDaysNumber; day ++) {
+			var monthDay = months[index].monthName.concat('_', day);
+				getPage(monthDay, time);
+		}
+	}
+};
+
+var processResponse = function(text, day, time) {
+	textLines = text.split('\n');
+	for (var lineIndex in textLines) {
+			parseLine(textLines[lineIndex], day, time);
+	}
+};
+
+var parseLine = function(line, day, time) {
 	var matches = categoryRegexPattern.exec(line);
 	// it might be a category
 	if (matches) {
@@ -147,8 +146,10 @@ var parseLine = function(line, day, time, promises) {
 			var title = matches[2].replace(extraLinkDescription, '[[')
 				.replace(bracketsRemove, '').replace('&ndash', '-').trim();
 
-			promises.push(dbStore.insertInCategory(currentCategory, title, day,
-				time, year));
+			dbStore.insertInCategory(currentCategory, title, day, time, year)
+				.catch(function(error) {
+					console.log("Insert in db Failed!", error);
+				});
 
 		} else {
 			// it might be a Holidays and Observances entry
@@ -157,53 +158,32 @@ var parseLine = function(line, day, time, promises) {
 				var title = matches[2].replace(extraLinkDescription, '[[')
 					.replace(bracketsRemove, '').replace('&ndash', '-').trim();
 
-				promises.push(dbStore.insertInCategory(currentCategory, title, day,
-					time));
+				dbStore.insertInCategory(currentCategory, title, day, time)
+				.catch(function(error) {
+					console.log("Insert in db Failed!", error);
+				});
 			}
 		}
 	}
 };
 
-
 if (!module.parent) {
-
-	var dbInstance;
-	var currentDay = 0, currentMonth = months[0].monthName, monthIndex = 0;
-	var _that = this;
-
-	console.log('Database fetch started');
-
-	eventEmitter.on('nextDay', function	() {
-		if (currentDay >= months[monthIndex].monthDaysNumber) {
-			if (currentMonth === months[months.length-1].monthName) {
-				eventEmitter.emit('fetchCompleted');
-				return;
-			}
-			else {
-				monthIndex ++;
-				currentMonth = months[monthIndex].monthName;
-				console.log(currentMonth);
-				currentDay = 1;
-			}
-		}
-		else {
-			currentDay ++;
-		}
-		getPage(currentMonth + '_' + currentDay);
-	});
-
-	eventEmitter.on('fetchCompleted', function() {
-		console.log('Database fetched completed!');
-		db.closeConnection();
-		process.exit(0);
-	});
 
 	db.connect()
 		.then(function(dbInstance) {
 			dbStore = WikipediaStore(dbInstance);
-			eventEmitter.emit('nextDay');
+
+			setInterval(getAllPages, fetchInterval);
 		})
 		.catch(function(err){
+			console.log('Can\'t connect to DB! Exiting ... ');
 			process.exit(127);
 		});
+} else {
+	module.exports = function(db) {
+		dbStore = WikipediaStore(db);
+		getAllPages();
+
+		setInterval(getAllPages, fetchInterval);
+	};
 }

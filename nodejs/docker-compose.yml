@@ -1,0 +1,13 @@
+version: '2'
+services:
+  db:
+    image: tutum/mongodb
+  web:
+    build: .
+    command: npm start
+    volumes:
+      - .:/code
+    ports:
+      - "3005:8080"
+    depends_on:
+      - db

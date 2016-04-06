@@ -33,8 +33,9 @@ DBstore.connect()
 		WikiFetch(dbInstance);
 	})
 	.catch(function(err) {
+		process.exit(0);
 		console.log(err);
 	});
 
 app.listen(port);
-console.log('Magic happens at http://localhost:' + port);
+console.log('Magic happens at port: ' + port);
