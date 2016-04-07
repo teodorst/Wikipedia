@@ -1,38 +1,19 @@
 import settings
-from flask import Flask, jsonify
-from app.stores.DataBase import Database
-import app.services.WikiService
 import sys
+from flask import Flask, jsonify
 
-
-#connect to database
-
-
-# # print collections
-# print(collections)
-
-
-# result = collections['events'].insert_one({
-#     'a' : '2'
-# })
-#
-# print(result.inserted_id)
-#
-# result = collections['deaths'].insert_one({
-#     'a' : '2'
-# })
-
-# print(result.inserted_id)
+from app.databases.database import Database
 
 
 if __name__ == "__main__":
 
+    # create web server
     app = Flask(__name__)
+
+    # connect to database
     database = Database(None, None)
 
-    print(database.dbConnection['Wikipedia'])
-
-    # check if database has connect succesfully
+    # check if database has connected succesfully
     if (database.dbConnection['connect'] == False):
         print("Database connection ................ Failed")
         sys.exit(127)

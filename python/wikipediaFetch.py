@@ -1,7 +1,11 @@
-import mwclient
-from threading import Thread
-from app.stores.WikipediaStore import WikipediaStore
+import sys
 import time
+import settings
+import mwclient
+
+from app.databases.database import Database
+from app.stores.wikipediaStore import WikipediaStore
+from wikipediaFetchThread import WikipediaFetchThread
 
 
 class Month():
@@ -13,44 +17,9 @@ class Month():
         return "Luna %s are %d zile " %(self.monthName, self.monthDays)
 
 
-
-
-#print months
-# print site.Pages['March_13'].text()
-# print site.Pages['March_13'].text()
-# print site.Pages['March_13'].text()
-
-
-
 def getTime():
     return int(round(time.time() * 1000))
 
-
-
-class WikipediaFetchThread(Thread):
-    def __init__(self, threadId, numThreads, pages, wikiClient, dbConnection):
-        Thread.__init__(self)
-        self.threadId = threadId
-        self.pages = pages
-        self.db = dbConnection
-        self.numThreads = numThreads
-
-    def run(self):
-        page = 'March_13'
-        # self.responseLines =
-
-    def parseResponse(self):
-        pass
-
-
-    # for index in range(numThreads):
-    #     thread = WikipediaFetchThread(index, numThreads, [], wikiClient, 0)
-    #     threads.append(thread)
-    #     thread.start()
-    #
-    # for index in range(numThreads):
-    #     threads[index].join()
-    #     print "Threadul %d a terminat" % index
 
 
 
@@ -75,12 +44,29 @@ class WikipediaFetcher:
             for day in range(1, month.monthDays + 1):
                 pages.append(month.monthName + '_' + str(day))
 
+        for index in range(1):
+            thread = WikipediaFetchThread(index, numThreads, [], self.wikiClient, 0)
+            threads.append(thread)
+            thread.start()
 
+        for index in range(1):
+            threads[index].join()
+            print("Threadul %d a terminat" % index)
 
-        print(pages)
-        print(len(pages))
         print(time)
+
+        self.wikiStore.saveEntry('test4','March_13', 'events', time, 2015)
+        self.wikiStore.saveEntry('test4','March_13', 'holidaysandobservances', time, None)
 
 
 if __name__ == "__main__":
-    WikipediaFetcher().fetchDB()
+
+    database = Database(None, None)
+
+    # check if database has connect succesfully
+    if (database.dbConnection['connect'] == False):
+        print("Database connection ................ Failed")
+        sys.exit(127)
+    else:
+        print("Database connection ................ Success")
+        WikipediaFetcher().fetchDB()

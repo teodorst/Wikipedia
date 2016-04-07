@@ -1,13 +1,15 @@
-version: '2'
-services:
-  db:
-    image: tutum/mongodb
-  web:
-    build: .
-    command: npm start
-    volumes:
-      - .:/code
-    ports:
-      - "3005:8080"
-    depends_on:
-      - db
+db:
+  image: tutum/mongodb
+  ports:
+    - "27017:27017"
+  environment:
+    - AUTH="no"
+web:
+  build: .
+  command: npm start
+  volumes:
+    - .:/code
+  ports:
+    - "3005:8080"
+  links:
+    - db

@@ -1,4 +1,4 @@
-from app.stores.WikipediaStore import WikipediaStore
+from app.stores.wikipediaStore import WikipediaStore
 
 
 class WikipediaService:
