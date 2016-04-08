@@ -14,7 +14,7 @@ var WikiRoutes 		= require('./app/routes/WikiRoutes.js');
 
 //services
 var WikiService 	= require('./app/services/WikiService.js');
-var WikiFetch 		= require('./app/services/WikipediaFetchPeriodicaly.js');
+var WikiFetch 		= require('./app/scripts/WikipediaFetchPeriodicaly.js');
 
 var port = process.env.PORT || 8080;
 

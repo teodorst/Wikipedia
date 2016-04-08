@@ -72,17 +72,16 @@ var months = [
 
 // regex rules to match lines
 // regex variables
-var characters = '#$–\\s\u00C0-\u1EF9\\w\\:\\&\|\';\.\(\),\!\-';
-var linkYear = '\\s*\\[\\[[0-9\\sBC]+\\]\\]\\s*';
-var year = '\\s*[0-9\\sBC]+\\s*';
-var linkWord = '\\s*(['+ characters + '\\{\\}\\[\\]]+,*\\s*)*';
-var word = '\\s*[' + characters + ']+\\s*';
+
+var word = '\\s*[\\s\\w]+\\s*'
+var linkYear = '\\s*\\[\\[[0-9\\sBC]+\\]\\]\\s*'
+var year = '\\s*[0-9\\sBC]+\\s*'
 
 // regex match lines rules
 var categoryRegexPattern = new RegExp('==(' + word + ')==');
-var entryRegexPattern = new RegExp('\\*('+ linkYear + '|' + year + ')&ndash;'
-	+ '(' + linkWord + '|' + word + ')+');
-var holidayRegexPattern = new RegExp('(\\*+)(' + linkWord + ')+');
+var entryRegexPattern = new RegExp('\\*('+ linkYear + '|' + year + ')'
+	+	'\\s*&ndash;\\s*');
+var holidayRegexPattern = new RegExp('(\\*+)\\s*');
 
 /*
 * convert lines to normal text by removing extra link description
@@ -90,7 +89,7 @@ var holidayRegexPattern = new RegExp('(\\*+)(' + linkWord + ')+');
 */
 var extraLinkDescription = new RegExp('(\\[[^\\]]+\\|)|(\\{[^\\}]+\\|)','ig');
 var bracketsRemove = new RegExp('[\\{\\}\\[\\]\\*]+','ig');
-var removeWhiteSpaces = new RegExp('\\s', 'g');
+var removeWhiteSpaces = new RegExp('\\s|(&nbsp;)', 'g');
 var removeDash = new RegExp('&ndash', 'g');
 
 var currentCategory = undefined;
@@ -133,10 +132,10 @@ var processResponse = function(text, time, day) {
 };
 
 var parseLine = function(line, day, time, promises) {
-	var matches = categoryRegexPattern.exec(line);
+	var match = categoryRegexPattern.exec(line);
 	// if it is a category
-	if (matches) {
-		var readCategory = matches[1].replace(removeWhiteSpaces, '');
+	if (match) {
+		var readCategory = match[1].replace(removeWhiteSpaces, '');
 		if (categories.indexOf(readCategory) > -1) {
 			currentCategory = readCategory.toLowerCase(); // another strinng
 		} else {
@@ -147,11 +146,12 @@ var parseLine = function(line, day, time, promises) {
 		if (!currentCategory) {
 			return;
 		}
-		matches = entryRegexPattern.exec(line);
-		if (matches !== null && currentCategory) {
-			var year = matches[1].replace(bracketsRemove, '')
+		match = entryRegexPattern.exec(line);
+		if (match !== null && currentCategory) {
+			var year = match[1].replace(bracketsRemove, '')
 				.replace(removeWhiteSpaces, '').trim();
-			var title = matches[2].replace(extraLinkDescription, '[[')
+			var titleIndex = line.indexOf(match[0]) + match[0].length;
+			var title = line.substring(titleIndex).replace(extraLinkDescription, '[[')
 				.replace(bracketsRemove, '').replace('&ndash', '-').trim();
 
 			promises.push(dbStore.insertInCategory(currentCategory, title, day,
@@ -162,11 +162,11 @@ var parseLine = function(line, day, time, promises) {
 				return;
 			}
 			// it it is a Holidays and Observances entry
-			matches = holidayRegexPattern.exec(line);
-			if (matches !== null && currentCategory) {
-				var title = matches[2].replace(extraLinkDescription, '[[')
+			match = holidayRegexPattern.exec(line);
+			if (match !== null && currentCategory) {
+				var titleIndex = line.indexOf(match[0]) + match[0].length;
+				var title = line.substring(titleIndex).replace(extraLinkDescription, '[[')
 					.replace(bracketsRemove, '').replace('&ndash', '-').trim();
-
 				promises.push(dbStore.insertInCategory(currentCategory, title, day,
 					time));
 			}
