@@ -72,7 +72,7 @@ var months = [
 
 // regex rules to match lines
 // regex variables
-var characters = '–\\s\u00C0-\u1EF9\\w\\:\\&\|\';\.\(\),\!\-';
+var characters = '#$–\\s\u00C0-\u1EF9\\w\\:\\&\|\';\.\(\),\!\-';
 var linkYear = '\\s*\\[\\[[0-9\\sBC]+\\]\\]\\s*';
 var year = '\\s*[0-9\\sBC]+\\s*';
 var linkWord = '\\s*(['+ characters + '\\{\\}\\[\\]]+,*\\s*)*';
@@ -158,6 +158,9 @@ var parseLine = function(line, day, time, promises) {
 				time, year));
 
 		} else {
+			if (!currentCategory) {
+				return;
+			}
 			// it it is a Holidays and Observances entry
 			matches = holidayRegexPattern.exec(line);
 			if (matches !== null && currentCategory) {

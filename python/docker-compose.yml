@@ -1,0 +1,15 @@
+db:
+  image: tutum/mongodb
+  ports:
+    - "27017:27017"
+  environment:
+    - AUTH="no"
+web:
+  build: .
+  command: python3.4 server.py
+  volumes:
+    - .:/code
+  ports:
+    - "3005:8080"
+  links:
+    - db

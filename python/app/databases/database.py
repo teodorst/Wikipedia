@@ -1,4 +1,4 @@
-from pymongo import MongoClient
+from pymongo import MongoClient, ASCENDING
 import os
 
 
@@ -7,30 +7,39 @@ class Database:
 
     class __Database:
         def __init__(self, dbUrl, dbName):
-            print("hai noroc")
             url = dbUrl
             name = dbName
             if not url:
                 url = os.environ['DB_URL']
+
+            # only for docker
+            if os.environ['DB_PORT']:
+                url = os.environ['DB_PORT'].replace('tcp', 'mongodb')
+
             print(url)
 
+
             if not name:
-                name = os.environ['DB_NAME']
-            self.dbConnection = MongoClient(dbUrl)[name]
+                name = os.environ['DB_NAME'] and "Wikipedia"
+
+
+            self.dbConnection = MongoClient(url)[name]
             self.wikiCollections = {
                 'events': self.dbConnection['EventsCollection'],
                 'births': self.dbConnection['BirthsCollection'],
                 'deaths': self.dbConnection['DeathsCollection'],
                 'holidaysandobservances': self.dbConnection['Holidaysandobservances']
             }
+            self.wikiCollections['events'].create_index([('title', ASCENDING)], unique=True)
+            self.wikiCollections['births'].create_index([('title', ASCENDING)], unique=True)
+            self.wikiCollections['deaths'].create_index([('title', ASCENDING)], unique=True)
+            self.wikiCollections['holidaysandobservances'].create_index([('title', ASCENDING)], unique=True)
 
     instance = None
 
     def __new__(self, dbUrl, dbName):
         if not Database.instance:
-            print('aici')
             Database.instance = Database.__Database(dbUrl, dbName)
-            print(Database.instance.dbConnection)
         return Database.instance
 
     def __getattr__(self, item):

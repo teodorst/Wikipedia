@@ -1,7 +1,8 @@
 import sys
 import time
-import settings
 import mwclient
+import os
+import settings
 
 from app.databases.database import Database
 from app.stores.wikipediaStore import WikipediaStore
@@ -32,31 +33,29 @@ class WikipediaFetcher:
         ]
         self.wikiClient = mwclient.Site('en.wikipedia.org', path='/w/')
         self.wikiStore = WikipediaStore()
+        self.pages = []
+        self.createPagesQueue()
 
+    def createPagesQueue(self):
+        for month in self.months:  # ok, got it. # hai cu compose-ul  masii
+            for day in range(1, month.monthDays + 1):
+                self.pages.append(month.monthName + '_' + str(day))
 
     def fetchDB(self):
         threads = []
-        numThreads = 8
+        numThreads = 4
         pages = []
         time = getTime()
 
-        for month in self.months:  # ok, got it. # hai cu compose-ul  masii
-            for day in range(1, month.monthDays + 1):
-                pages.append(month.monthName + '_' + str(day))
-
-        for index in range(1):
-            thread = WikipediaFetchThread(index, numThreads, [], self.wikiClient, 0)
+        print("Begin database fetching: ... ")
+        for index in range(numThreads):
+            thread = WikipediaFetchThread(index, numThreads, self.pages, self.wikiClient, self.wikiStore, time)
             threads.append(thread)
             thread.start()
 
-        for index in range(1):
+        for index in range(numThreads):
             threads[index].join()
-            print("Threadul %d a terminat" % index)
 
-        print(time)
-
-        self.wikiStore.saveEntry('test4','March_13', 'events', time, 2015)
-        self.wikiStore.saveEntry('test4','March_13', 'holidaysandobservances', time, None)
 
 
 if __name__ == "__main__":
