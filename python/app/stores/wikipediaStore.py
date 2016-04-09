@@ -134,5 +134,11 @@ class WikipediaStore:
     """
     @param: last time when databse was fetched
     """
-    def removeOldData(self, oldTime):
-        pass
+    def removeOldData(self,category, oldTime):
+        result = self.collections[category].delete_many(
+            {
+                'updated' : {
+                            '$lte': oldTime
+                            }
+            })
+        return result.deleted_count

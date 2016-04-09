@@ -2,7 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="3638bd73-895f-45f8-bb42-c0d489823e96" name="Default" comment="">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/stores/wikipediaStore.py" afterPath="$PROJECT_DIR$/app/stores/wikipediaStore.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/wikipediaFetch.py" afterPath="$PROJECT_DIR$/wikipediaFetch.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/wikipediaFetchThread.py" afterPath="$PROJECT_DIR$/wikipediaFetchThread.py" />
     </list>
     <ignored path="python.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -20,7 +22,7 @@
     <SUITE FILE_PATH="coverage/python$DataBase.coverage" NAME="DataBase Coverage Results" MODIFIED="1460046424699" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/app/stores" />
     <SUITE FILE_PATH="coverage/python$wikipediaFetchThread.coverage" NAME="wikipediaFetchThread Coverage Results" MODIFIED="1460109881910" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/python$WikipediaFetch.coverage" NAME="WikipediaFetch Coverage Results" MODIFIED="1460131572519" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/python$server.coverage" NAME="server Coverage Results" MODIFIED="1460211768835" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/python$server.coverage" NAME="server Coverage Results" MODIFIED="1460220555811" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
   <component name="CreatePatchCommitExecutor">
     <option name="PATCH_PATH" value="" />
@@ -31,11 +33,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="wikipediaFetch.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="wikipediaFetch.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/wikipediaFetch.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="150">
-              <caret line="25" column="26" selection-start-line="25" selection-start-column="26" selection-end-line="25" selection-end-column="26" />
+            <state relative-caret-position="445">
+              <caret line="75" column="11" selection-start-line="75" selection-start-column="10" selection-end-line="75" selection-end-column="11" />
               <folding>
                 <element signature="e#0#10#0" expanded="true" />
               </folding>
@@ -46,8 +48,8 @@
       <file leaf-file-name="wikipediaFetchThread.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/wikipediaFetchThread.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="690">
-              <caret line="46" column="14" selection-start-line="46" selection-start-column="14" selection-end-line="46" selection-end-column="14" />
+            <state relative-caret-position="250">
+              <caret line="109" column="37" selection-start-line="109" selection-start-column="37" selection-end-line="109" selection-end-column="37" />
               <folding>
                 <element signature="e#0#28#0" expanded="true" />
               </folding>
@@ -129,11 +131,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="wikipediaStore.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="wikipediaStore.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/app/stores/wikipediaStore.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="531">
-              <caret line="137" column="12" selection-start-line="137" selection-start-column="12" selection-end-line="137" selection-end-column="12" />
+            <state relative-caret-position="325">
+              <caret line="143" column="8" selection-start-line="143" selection-start-column="8" selection-end-line="143" selection-end-column="8" />
               <folding />
             </state>
           </provider>
@@ -172,14 +174,14 @@
         <option value="$PROJECT_DIR$/serverFetcherThread.py" />
         <option value="$PROJECT_DIR$/Dockerfile" />
         <option value="$PROJECT_DIR$/docker-compose.yml" />
-        <option value="$PROJECT_DIR$/wikipediaFetchThread.py" />
         <option value="$PROJECT_DIR$/settings.py" />
         <option value="$PROJECT_DIR$/requirements.txt" />
-        <option value="$PROJECT_DIR$/app/stores/wikipediaStore.py" />
         <option value="$PROJECT_DIR$/app/databases/database.py" />
         <option value="$PROJECT_DIR$/app/services/WikiService.py" />
         <option value="$PROJECT_DIR$/server.py" />
         <option value="$PROJECT_DIR$/wikipediaFetch.py" />
+        <option value="$PROJECT_DIR$/wikipediaFetchThread.py" />
+        <option value="$PROJECT_DIR$/app/stores/wikipediaStore.py" />
       </list>
     </option>
   </component>
@@ -927,16 +929,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/wikipediaFetchThread.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="690">
-          <caret line="46" column="14" selection-start-line="46" selection-start-column="14" selection-end-line="46" selection-end-column="14" />
-          <folding>
-            <element signature="e#0#28#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/requirements.txt">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="60">
@@ -952,14 +944,6 @@
           <folding>
             <element signature="e#65#98#0" expanded="true" />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/stores/wikipediaStore.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="531">
-          <caret line="137" column="12" selection-start-line="137" selection-start-column="12" selection-end-line="137" selection-end-column="12" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -989,13 +973,31 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/wikipediaFetchThread.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="250">
+          <caret line="109" column="37" selection-start-line="109" selection-start-column="37" selection-end-line="109" selection-end-column="37" />
+          <folding>
+            <element signature="e#0#28#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/wikipediaFetch.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="150">
-          <caret line="25" column="26" selection-start-line="25" selection-start-column="26" selection-end-line="25" selection-end-column="26" />
+        <state relative-caret-position="445">
+          <caret line="75" column="11" selection-start-line="75" selection-start-column="10" selection-end-line="75" selection-end-column="11" />
           <folding>
             <element signature="e#0#10#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/stores/wikipediaStore.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="325">
+          <caret line="143" column="8" selection-start-line="143" selection-start-column="8" selection-end-line="143" selection-end-column="8" />
+          <folding />
         </state>
       </provider>
     </entry>

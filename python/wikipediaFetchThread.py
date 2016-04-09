@@ -4,8 +4,17 @@ import re
 
 categories = ['events', 'births', 'deaths', 'holidaysandobservances']
 
+def getCateogory(threadId):
+    return  {
+        0 : 'events',
+        1 : 'births',
+        2 : 'deaths',
+        3 : 'holidaysandobservances'
+    }[threadId]
+
+
 class WikipediaFetchThread(Thread):
-    def __init__(self, threadId, numThreads, pages, wikiClient, wikiStore, time ):
+    def __init__(self, threadId, numThreads, pages, wikiClient, wikiStore, time, lastUpdatedTime ):
         Thread.__init__(self)
         self.threadId = threadId
         self.numThreads = numThreads
@@ -13,6 +22,7 @@ class WikipediaFetchThread(Thread):
         self.wikiClient = wikiClient
         self.wikiStore = wikiStore
         self.time = time
+        self.lastUpdatedTime = lastUpdatedTime
         self.setRegex()
 
 
@@ -91,8 +101,14 @@ class WikipediaFetchThread(Thread):
 
     def run(self):
         # page = 'December_23'
+        cleanUpCategory = getCateogory(self.threadId)
+        print("category", cleanUpCategory)
         for index in range(self.threadId, len(self.pages),self.numThreads):
             page = self.pages[index]
             pageResponse = self.wikiClient.Pages[page].text()
             self.parseResponse(pageResponse.split('\n'), page)
             print("%s Completed" % page)
+
+        # cleanup category
+        self.wikiStore.removeOldData(cleanUpCategory, self.lastUpdatedTime)
+        print("Category %s cleaned" % cleanUpCategory)

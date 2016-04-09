@@ -8,6 +8,8 @@ from app.databases.database import Database
 from app.stores.wikipediaStore import WikipediaStore
 from wikipediaFetchThread import WikipediaFetchThread
 
+LOG_FILE_PATH = 'timelog.txt'
+
 
 class Month():
     def __init__(self, monthName, monthDays):
@@ -22,23 +24,25 @@ def getTime():
     return int(round(time.time() * 1000))
 
 
-def readLastUpdateTime():
+def readLastUpdateTime(currentTime):
     lastUpdatedTime = None
-    if os.path.exists('timelog.txt'):
+    # read last updateTime or create file if it not exits
+    if os.path.exists(LOG_FILE_PATH) and os.path.isfile(LOG_FILE_PATH):
+        # if it exist
         inputFile = open('timelog.txt', 'r')
-
-    #
-    # outputFile = open('timelog.txt', 'a')
-    # outputFile.write(str(time) + '\n')
-    #
-    # line = None
-    # for line in inputFile:
-    #     pass
-    #
-    # lastUpdatedTime = int(line, 10)
-    #
-    # outputFile.close()
-    # outputFile.close()
+        line = None
+        for line in inputFile:
+            pass
+        if not line and line is not None:
+            print('Line', line)
+            lastUpdatedTime = int(line, 10)
+        else:
+            lastUpdatedTime = None
+    else:
+        lastUpdatedTime = None
+    with open(LOG_FILE_PATH, 'a') as outputFile:
+        outputFile.write(str(currentTime) + '\n')
+        outputFile.close()
 
     return lastUpdatedTime
 
@@ -66,13 +70,13 @@ class WikipediaFetcher:
         pages = []
         time = getTime()
 
-        lastUpdatedTime = readLastUpdateTime()
+        lastUpdatedTime = readLastUpdateTime(time)
         print(lastUpdatedTime)
 
         print("Begin database fetching: ... ")
         for index in range(numThreads):
             thread = WikipediaFetchThread(index, numThreads, self.pages,
-                self.wikiClient, self.wikiStore, time)
+                self.wikiClient, self.wikiStore, time, lastUpdatedTime)
             threads.append(thread)
             thread.start()
 
