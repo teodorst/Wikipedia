@@ -6,6 +6,7 @@ var removeExtraData = function(result) {
 
 };
 
+// create query object for find
 var createQueryObject = function(day, year, keyword) {
 	var queryObj = {};
 	if (day) {
@@ -22,41 +23,43 @@ var createQueryObject = function(day, year, keyword) {
 };
 
 
+// Wikipedia store, the first layer over database
 var wikipediaStore = {
+	// insert database
 	insertInCategory: function(category, title, day, time, year) {
+		var updatedObject = {
+			title: title,
+			day: day,
+			year: year,
+			category: category,
+			updated: time
+		};
+		// if year exists then it's not a holiday
 		if (year) {
 			return collections[category].update({
 				title: title,
 				category: category
 			},
-			{
-				title: title,
-				day: day,
-				year: year,
-				category: category,
-				updated: time
-			},
+			updatedObject,
 			{
 				upsert: true
 			}
 		);
 		} else {
+			// it's an event, death or birth
 			return collections[category].update({
 				title: title,
 				category: category
 			},
-			{
-				title: title,
-				day: day,
-				category: category,
-				updated: time
-			},
+			updatedObject,
 			{
 				upsert:true
 			}
 		);
 		}
 	},
+
+	// find for a specific category
 	findInCategory: function(category, day, year, keyword) {
 		var queryObj = createQueryObject(day, year, keyword);
 		console.log(category);
@@ -66,6 +69,7 @@ var wikipediaStore = {
 		return collections[category].find(queryObj).toArray();
 	},
 
+	// find in all categories
 	findAll: function(day, year, keyword) {
 		var queryObj = createQueryObject(day, year, keyword);
 		var results = [];
@@ -76,10 +80,9 @@ var wikipediaStore = {
 					promises.push(collections[key].find(queryObj).toArray());
 				}
 				else {
+					// remove property of year, if exists
 					if (queryObj.year) {
-						console.log('BEFORE DELETE: ',queryObj);
 						delete queryObj.year;
-						console.log('AFTER DELETE:', queryObj);
 					}
 					promises.push(collections[key].find(queryObj).toArray());
 				}
@@ -97,6 +100,7 @@ var wikipediaStore = {
 		});
 	},
 	clearCollections: function () {
+		// soon
 		// WikipediaModels['Events'].remove();
 		// WikipediaModels['Deaths'].remove();
 		// WikipediaModels['Births'].remove();

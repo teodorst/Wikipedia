@@ -44,7 +44,7 @@ class WikipediaFetchThread(Thread):
     def convertEntry(self, entry):
         return re.sub(
             self.removeDash,
-            '',
+            '-',
             re.sub(
                 self.removeBrackets,
                 '',

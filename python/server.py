@@ -21,9 +21,6 @@ def fetchDB(fetcher):
 
 if __name__ == "__main__":
 
-    #doamne ajuta
-    print(os.environ)
-
     # create web server
     app = Flask(__name__)
 

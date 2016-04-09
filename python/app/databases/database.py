@@ -13,8 +13,9 @@ class Database:
                 url = os.environ['DB_URL']
 
             # only for docker
-            if os.environ['DB_PORT']:
+            if 'DB_PORT' in os.environ:
                 url = os.environ['DB_PORT'].replace('tcp', 'mongodb')
+
 
             print(url)
 

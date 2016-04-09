@@ -92,12 +92,25 @@ var bracketsRemove = new RegExp('[\\{\\}\\[\\]\\*]+','ig');
 var removeWhiteSpaces = new RegExp('\\s|(&nbsp;)', 'g');
 var removeDash = new RegExp('&ndash', 'g');
 
+// used to know what's the category that i'm parsing
 var currentCategory = undefined;
 
+// get current time system time
 var getCurrentTime = function(){
   return new Date().getTime();
 }
 
+// extract title from line based of match of the regex
+var extractTitle = function(line, match) {
+	var titleIndex = line.indexOf(match[0]) + match[0].length;
+	return title = line.substring(titleIndex).replace(extraLinkDescription, '[[')
+		.replace(bracketsRemove, '').replace(removeDash, '-').trim();
+
+}
+
+
+// get page (string, integer)
+// make api call for the specified page
 var getPage = function(monthDay, time) {
 	client.getArticle(
 		monthDay,
@@ -113,6 +126,11 @@ var getPage = function(monthDay, time) {
 	);
 }
 
+
+/* process response from api call, start parsing and create
+	the arrays of promises.
+	emit event when all promises are completed
+*/
 var processResponse = function(text, time, day) {
 	var promises = [];
 	textLines = text.split('\n');
@@ -131,11 +149,19 @@ var processResponse = function(text, time, day) {
 		})
 };
 
+
+/*
+	Main parsing function. Recives a line, and based on current
+	category, calls the WikipediaStore to insert a new category
+	entry in database
+*/
 var parseLine = function(line, day, time, promises) {
 	var match = categoryRegexPattern.exec(line);
+
 	// if it is a category
 	if (match) {
 		var readCategory = match[1].replace(removeWhiteSpaces, '');
+		// check if it's a desired category
 		if (categories.indexOf(readCategory) > -1) {
 			currentCategory = readCategory.toLowerCase(); // another strinng
 		} else {
@@ -148,15 +174,14 @@ var parseLine = function(line, day, time, promises) {
 		}
 		match = entryRegexPattern.exec(line);
 		if (match !== null && currentCategory) {
+			//extract year
 			var year = match[1].replace(bracketsRemove, '')
 				.replace(removeWhiteSpaces, '').trim();
-			var titleIndex = line.indexOf(match[0]) + match[0].length;
-			var title = line.substring(titleIndex).replace(extraLinkDescription, '[[')
-				.replace(bracketsRemove, '').replace('&ndash', '-').trim();
-
+			//extract title
+			var title = extractTitle(line, match);
+			// add another promise
 			promises.push(dbStore.insertInCategory(currentCategory, title, day,
 				time, year));
-
 		} else {
 			if (!currentCategory) {
 				return;
@@ -164,9 +189,8 @@ var parseLine = function(line, day, time, promises) {
 			// it it is a Holidays and Observances entry
 			match = holidayRegexPattern.exec(line);
 			if (match !== null && currentCategory) {
-				var titleIndex = line.indexOf(match[0]) + match[0].length;
-				var title = line.substring(titleIndex).replace(extraLinkDescription, '[[')
-					.replace(bracketsRemove, '').replace('&ndash', '-').trim();
+				//extract title
+				var title = extractTitle(line, match);
 				promises.push(dbStore.insertInCategory(currentCategory, title, day,
 					time));
 			}
@@ -176,13 +200,16 @@ var parseLine = function(line, day, time, promises) {
 
 
 if (!module.parent) {
-
+	var startTime = getCurrentTime()
 	var dbInstance;
 	var currentDay = 0, currentMonth = months[0].monthName, monthIndex = 0;
 	var _that = this;
 
 	console.log('Database fetch started');
 
+	// next day event handler
+	// if it's the last day of year, December_31 then close fire
+	// fetchedCompleted event
 	eventEmitter.on('nextDay', function	() {
 		if (currentDay >= months[monthIndex].monthDaysNumber) {
 			if (currentMonth === months[months.length-1].monthName) {
@@ -202,12 +229,16 @@ if (!module.parent) {
 		getPage(currentMonth + '_' + currentDay);
 	});
 
+	// close db connection and finish script
 	eventEmitter.on('fetchCompleted', function() {
 		console.log('Database fetched completed!');
 		db.closeConnection();
+		var finishTime = getCurrentTime();
+		console.log((finishTime - startTime) / 1000);
 		process.exit(0);
 	});
 
+	// connect to db
 	db.connect()
 		.then(function(dbInstance) {
 			dbStore = WikipediaStore(dbInstance);

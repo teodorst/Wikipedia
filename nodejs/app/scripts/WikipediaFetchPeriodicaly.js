@@ -93,6 +93,16 @@ var getCurrentTime = function(){
   return new Date().getTime();
 }
 
+// extract title from line based of match of the regex
+var extractTitle = function(line, match) {
+	var titleIndex = line.indexOf(match[0]) + match[0].length;
+	return title = line.substring(titleIndex).replace(extraLinkDescription, '[[')
+		.replace(bracketsRemove, '').replace(removeDash, '-').trim();
+
+}
+
+// get page (string, integer)
+// make api call for the specified page
 var getPage = function(monthDay, time) {
 	client.getArticle(
 		monthDay,
@@ -110,6 +120,8 @@ var getPage = function(monthDay, time) {
 	);
 };
 
+// get page (string, integer)
+// make api call for the specified page
 var getAllPages = function() {
 	var time = getCurrentTime();
 	currentCategory = undefined;
@@ -123,6 +135,11 @@ var getAllPages = function() {
 	}
 };
 
+
+/* process response from api call, start parsing and create
+	split in lines, and parse every line
+*/
+
 var processResponse = function(text, day, time) {
 	textLines = text.split('\n');
 	for (var lineIndex in textLines) {
@@ -130,6 +147,12 @@ var processResponse = function(text, day, time) {
 	}
 };
 
+
+/*
+	Main parsing function. Recives a line, and based on current
+	category, calls the WikipediaStore to insert a new category
+	entry in database
+*/
 var parseLine = function(line, day, time) {
 	var match = categoryRegexPattern.exec(line);
 	// it might be a category
@@ -147,12 +170,11 @@ var parseLine = function(line, day, time) {
 		}
 		match = entryRegexPattern.exec(line);
 		if (match !== null && currentCategory) {
+			// extract year
 			var year = match[1].replace(bracketsRemove, '')
 				.replace(removeWhiteSpaces, '').trim();
-			var titleIndex = line.indexOf(match[0]) + match[0].length;
-			var title = line.substring(titleIndex).replace(extraLinkDescription, '[[')
-				.replace(bracketsRemove, '').replace('&ndash', '-').trim();
-
+			//extract title
+			var title = extractTitle(line, match);
 			dbStore.insertInCategory(currentCategory, title, day, time, year)
 				.catch(function(error) {
 					console.log("Insert in db Failed!", error);
@@ -162,9 +184,8 @@ var parseLine = function(line, day, time) {
 			// it might be a Holidays and Observances entry
 			match = holidayRegexPattern.exec(line);
 			if (match !== null && currentCategory) {
-				var titleIndex = line.indexOf(match[0]) + match[0].length;
-				var title = line.substring(titleIndex).replace(extraLinkDescription, '[[')
-					.replace(bracketsRemove, '').replace('&ndash', '-').trim();
+				//extract title
+				var title = extractTitle(line, match);
 				dbStore.insertInCategory(currentCategory, title, day, time)
 				.catch(function(error) {
 					console.log("Insert in db Failed!", error);
@@ -190,7 +211,7 @@ if (!module.parent) {
 	module.exports = function(db) {
 		dbStore = WikipediaStore(db);
 		getAllPages();
-
+		// place in loop event queue to call again in 2h
 		setInterval(getAllPages, fetchInterval);
 	};
 }

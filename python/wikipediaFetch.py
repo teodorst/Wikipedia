@@ -56,6 +56,7 @@ class WikipediaFetcher:
         for index in range(numThreads):
             threads[index].join()
 
+        print ((getTime() - time) / 1000)
 
 
 if __name__ == "__main__":

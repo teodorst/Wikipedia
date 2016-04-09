@@ -1,4 +1,5 @@
 module.exports = function(dbInstance) {
+	// creating collections if they don't exits
 	var collections = {
 		events: dbInstance.collection('EventsCollection'),
 		births: dbInstance.collection('BirthsCollection'),
@@ -7,6 +8,8 @@ module.exports = function(dbInstance) {
 			'HolidaysAndObservancesCollection'
 		)
 	};
+
+	// creating collections indexes
 	collections['events'].createIndex({title: 1}, {unique: true})
 		.catch(function(err){
 			console.log(arguments);
