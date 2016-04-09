@@ -2,14 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="3638bd73-895f-45f8-bb42-c0d489823e96" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../nodejs/Dockerfile" afterPath="$PROJECT_DIR$/../nodejs/Dockerfile" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/databases/database.py" afterPath="$PROJECT_DIR$/app/databases/database.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/services/WikiService.py" afterPath="$PROJECT_DIR$/app/services/WikiService.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/stores/wikipediaStore.py" afterPath="$PROJECT_DIR$/app/stores/wikipediaStore.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/requirements.txt" afterPath="$PROJECT_DIR$/requirements.txt" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/server.py" afterPath="$PROJECT_DIR$/server.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/settings.py" afterPath="$PROJECT_DIR$/settings.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/wikipediaFetch.py" afterPath="$PROJECT_DIR$/wikipediaFetch.py" />
     </list>
     <ignored path="python.iws" />
@@ -42,8 +34,8 @@
       <file leaf-file-name="wikipediaFetch.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/wikipediaFetch.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="180">
-              <caret line="27" column="8" selection-start-line="27" selection-start-column="8" selection-end-line="27" selection-end-column="8" />
+            <state relative-caret-position="150">
+              <caret line="25" column="26" selection-start-line="25" selection-start-column="26" selection-end-line="25" selection-end-column="26" />
               <folding>
                 <element signature="e#0#10#0" expanded="true" />
               </folding>
@@ -999,8 +991,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/wikipediaFetch.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="180">
-          <caret line="27" column="8" selection-start-line="27" selection-start-column="8" selection-end-line="27" selection-end-column="8" />
+        <state relative-caret-position="150">
+          <caret line="25" column="26" selection-start-line="25" selection-start-column="26" selection-end-line="25" selection-end-column="26" />
           <folding>
             <element signature="e#0#10#0" expanded="true" />
           </folding>

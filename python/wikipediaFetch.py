@@ -23,19 +23,22 @@ def getTime():
 
 
 def readLastUpdateTime():
+    lastUpdatedTime = None
     if os.path.exists('timelog.txt'):
         inputFile = open('timelog.txt', 'r')
-    outputFile = open('timelog.txt', 'a')
-    outputFile.write(str(time) + '\n')
 
-    line = None
-    for line in inputFile:
-        pass
-
-    lastUpdatedTime = int(line, 10)
-
-    outputFile.close()
-    outputFile.close()
+    #
+    # outputFile = open('timelog.txt', 'a')
+    # outputFile.write(str(time) + '\n')
+    #
+    # line = None
+    # for line in inputFile:
+    #     pass
+    #
+    # lastUpdatedTime = int(line, 10)
+    #
+    # outputFile.close()
+    # outputFile.close()
 
     return lastUpdatedTime
 
