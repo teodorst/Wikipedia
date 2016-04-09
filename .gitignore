@@ -1,4 +1,5 @@
 nodejs/.env
 python/.env
 nodejs/node_modules
-
+python/.idea
+python/__pycache__
