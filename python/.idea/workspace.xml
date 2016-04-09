@@ -1,21 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="3638bd73-895f-45f8-bb42-c0d489823e96" name="Default" comment="">
-      <change type="DELETED" beforePath="$PROJECT_DIR$/../wikipedia-docker/Dockerfile" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../README.md" afterPath="$PROJECT_DIR$/../README.md" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../nodejs/app/collections/WikipediaCollections.js" afterPath="$PROJECT_DIR$/../nodejs/app/collections/WikipediaCollections.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../nodejs/app/routes/WikiRoutes.js" afterPath="$PROJECT_DIR$/../nodejs/app/routes/WikiRoutes.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../nodejs/app/scripts/WikipediaFetch.js" afterPath="$PROJECT_DIR$/../nodejs/app/scripts/WikipediaFetch.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../nodejs/app/scripts/WikipediaFetchPeriodicaly.js" afterPath="$PROJECT_DIR$/../nodejs/app/scripts/WikipediaFetchPeriodicaly.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../nodejs/app/services/WikiService.js" afterPath="$PROJECT_DIR$/../nodejs/app/services/WikiService.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../nodejs/app/stores/WikipediaStore.js" afterPath="$PROJECT_DIR$/../nodejs/app/stores/WikipediaStore.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app/databases/database.py" afterPath="$PROJECT_DIR$/app/databases/database.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/server.py" afterPath="$PROJECT_DIR$/server.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/wikipediaFetch.py" afterPath="$PROJECT_DIR$/wikipediaFetch.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/wikipediaFetchThread.py" afterPath="$PROJECT_DIR$/wikipediaFetchThread.py" />
-    </list>
+    <list default="true" id="3638bd73-895f-45f8-bb42-c0d489823e96" name="Default" comment="" />
     <ignored path="python.iws" />
     <ignored path=".idea/workspace.xml" />
     <ignored path=".idea/dataSources.local.xml" />

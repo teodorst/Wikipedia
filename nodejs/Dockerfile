@@ -1,3 +1,10 @@
+############################################################
+# Dockerfile to build Wikiserver (nodejs)
+###########################################################
+
+# File Author / Maintainer
+MAINTAINER Teodor Stefu
+
 FROM node:argon
 
 # Create app directory

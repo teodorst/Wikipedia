@@ -1,9 +1,9 @@
 ############################################################
-# Dockerfile to build Wikiserver
-# Based on Ubuntu
-############################################################
+# Dockerfile to build Wikiserver (python)
+###########################################################
 
-# Set the base image to Ubuntu
+
+
 FROM python:3.4
 
 
@@ -11,7 +11,7 @@ FROM python:3.4
 MAINTAINER Teodor Stefu
 
 # Add the application resources URL
-RUN echo "deb http://archive.ubuntu.com/ubuntu/ $(lsb_release -sc) main universe" >> /etc/apt/sources.list
+# RUN echo "deb http://archive.ubuntu.com/ubuntu/ $(lsb_release -sc) main universe" >> /etc/apt/sources.list
 
 COPY . /python_app
 
@@ -30,5 +30,3 @@ RUN pip install -r requirements.txt
 EXPOSE 3005
 
 CMD [ "python3.4", "server.py" ]
-
-
