@@ -1,6 +1,10 @@
 from app.databases.database import Database
 
-
+"""
+Create query object used by find function
+@:param query parameters (day, year, keyword)
+@:return dictionary of query params
+"""
 def createQueryObject(day, year, keyword):
     queryObject = {}
     if day is not None:
@@ -16,10 +20,23 @@ def createQueryObject(day, year, keyword):
     return queryObject
 
 
+"""
+Convert _id from object to string
+@:param dictionary from DB
+@:return dictionary with _id changed
+"""
 def convertId(document):
     document['_id'] = str(document['_id'])
     return document
 
+
+"""
+Database layer interface. (database store)
+Expose functions for services.
+saveEntry - add a new entry to a category
+findInCategory - find documents that match parameters in categories
+removeOldData - remove old data from database
+"""
 class WikipediaStore:
     def __init__(self):
         self.collections = Database(None, None).wikiCollections
@@ -27,6 +44,12 @@ class WikipediaStore:
     def __str__(self):
         print(self.collections)
 
+    """
+    @:param query params from request
+    @:return True if files were updated
+            String (id) if entry is added
+            False otherwise
+    """
     def saveEntry(self, title, day, category, time, year):
         if not title or not day or not category:
             return None
@@ -68,12 +91,19 @@ class WikipediaStore:
 
         if result.acknowledged == True:
             if result.matched_count > 0 and result.modified_count > 0:
-                return None
+                return True
             elif result.matched_count == 0 and result.upserted_id:
                 return result.upserted_id
             else:
-                return None
+                return False
 
+
+    """
+    Find in a specific category
+    @:param query params for find function
+    @:return a list of documents from database
+    that matches query params
+    """
     def findInCategory(self, category, day, year, keyword):
         results = []
         queryObj = createQueryObject(day, year, keyword)
@@ -81,7 +111,12 @@ class WikipediaStore:
             del queryObj['year']
         return list(map(convertId, [doc for doc in self.collections[category].find(queryObj)]))
 
-
+    """
+    Find in all categories
+    @:param query params for find function
+    @:return a list of documents from database
+    that matches query params
+    """
 
     def findAll(self, day, year, keyword):
         result = []
@@ -94,3 +129,10 @@ class WikipediaStore:
                 del queryObj2['year']
                 result += list(map(convertId, [doc for doc in self.collections[category].find(queryObj)]))
         return result
+
+
+    """
+    @param: last time when databse was fetched
+    """
+    def removeOldData(self, oldTime):
+        pass

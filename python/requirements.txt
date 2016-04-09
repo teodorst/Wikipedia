@@ -2,3 +2,4 @@ Flask
 pymongo
 mwclient
 django-dotenv
+dotenv

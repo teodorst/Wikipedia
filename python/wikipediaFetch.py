@@ -1,8 +1,8 @@
 import sys
 import time
 import mwclient
-import os
 import settings
+import os
 
 from app.databases.database import Database
 from app.stores.wikipediaStore import WikipediaStore
@@ -22,6 +22,22 @@ def getTime():
     return int(round(time.time() * 1000))
 
 
+def readLastUpdateTime():
+    if os.path.exists('timelog.txt'):
+        inputFile = open('timelog.txt', 'r')
+    outputFile = open('timelog.txt', 'a')
+    outputFile.write(str(time) + '\n')
+
+    line = None
+    for line in inputFile:
+        pass
+
+    lastUpdatedTime = int(line, 10)
+
+    outputFile.close()
+    outputFile.close()
+
+    return lastUpdatedTime
 
 
 class WikipediaFetcher:
@@ -37,7 +53,7 @@ class WikipediaFetcher:
         self.createPagesQueue()
 
     def createPagesQueue(self):
-        for month in self.months:  # ok, got it. # hai cu compose-ul  masii
+        for month in self.months:
             for day in range(1, month.monthDays + 1):
                 self.pages.append(month.monthName + '_' + str(day))
 
@@ -47,9 +63,13 @@ class WikipediaFetcher:
         pages = []
         time = getTime()
 
+        lastUpdatedTime = readLastUpdateTime()
+        print(lastUpdatedTime)
+
         print("Begin database fetching: ... ")
         for index in range(numThreads):
-            thread = WikipediaFetchThread(index, numThreads, self.pages, self.wikiClient, self.wikiStore, time)
+            thread = WikipediaFetchThread(index, numThreads, self.pages,
+                self.wikiClient, self.wikiStore, time)
             threads.append(thread)
             thread.start()
 

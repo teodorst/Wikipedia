@@ -1,10 +1,17 @@
 from pymongo import MongoClient, ASCENDING
 import os
 
-
+"""
+Singleton class
+Establish connection to database and create database collections
+"""
 
 class Database:
 
+    """
+    @:param dburl: String mongodb connection url
+    @:param dbName: String database name
+    """
     class __Database:
         def __init__(self, dbUrl, dbName):
             url = dbUrl
@@ -17,9 +24,6 @@ class Database:
                 url = os.environ['DB_PORT'].replace('tcp', 'mongodb')
 
 
-            print(url)
-
-
             if not name:
                 name = os.environ['DB_NAME'] and "Wikipedia"
 
@@ -29,12 +33,24 @@ class Database:
                 'events': self.dbConnection['EventsCollection'],
                 'births': self.dbConnection['BirthsCollection'],
                 'deaths': self.dbConnection['DeathsCollection'],
-                'holidaysandobservances': self.dbConnection['Holidaysandobservances']
+                'holidaysandobservances': self.dbConnection['Holidaysand'+
+                    'observances']
             }
-            self.wikiCollections['events'].create_index([('title', ASCENDING)], unique=True)
-            self.wikiCollections['births'].create_index([('title', ASCENDING)], unique=True)
-            self.wikiCollections['deaths'].create_index([('title', ASCENDING)], unique=True)
-            self.wikiCollections['holidaysandobservances'].create_index([('title', ASCENDING)], unique=True)
+            """
+            index collections with title in ascending order and unique
+            """
+            self.wikiCollections['events'].create_index(
+                [('title', ASCENDING)], unique=True
+            )
+            self.wikiCollections['births'].create_index(
+                [('title', ASCENDING)], unique=True
+            )
+            self.wikiCollections['deaths'].create_index(
+                [('title', ASCENDING)], unique=True
+            )
+            self.wikiCollections['holidaysandobservances'].create_index(
+                [('title', ASCENDING)], unique=True
+            )
 
     instance = None
 
