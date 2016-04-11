@@ -2,10 +2,12 @@ var bot 							= require('nodemw');
 var WikipediaStore 		= require('../stores/WikipediaStore.js');
 var db 								= require('../stores/DataBase.js');
 var EventEmitter 			= require('events');
+var fs 								= require('fs');
 
 var minutes = 120, interval = minutes * 60 * 1000;
 var eventEmitter = new EventEmitter();
 
+var TIMELOG_PATH = 'timelog.txt'
 
 // WIkipedia connection client
 var client = new bot({
@@ -95,6 +97,33 @@ var removeDash = new RegExp('&ndash', 'g');
 // used to know what's the category that i'm parsing
 var currentCategory = undefined;
 
+
+var getLastUpdateTime = function(currentTime) {
+	return new Promise(function(resolve, reject) {
+		fs.stat(TIMELOG_PATH, function(err, stats) {
+			if (err) {
+				fs.appendFileSync(TIMELOG_PATH, currentTime + '\n');
+				resolve(undefined);
+				return;
+			}
+			var lastUpdatedTime = undefined;
+			if (stats.isFile()) {
+				fs.readFile(TIMELOG_PATH, function(err, buf) {
+					linesArray = buf.toString().split('\n');
+					lastUpdatedTime = linesArray[linesArray.length - 2];
+					fs.appendFileSync(TIMELOG_PATH, currentTime + '\n');
+					resolve(parseInt(lastUpdatedTime, 10))
+				});
+			}
+			else {
+				// is not a regular file
+				// i can't write new current time
+				resolve(undefined)
+			}
+		});
+	});
+}
+
 // get current time system time
 var getCurrentTime = function(){
   return new Date().getTime();
@@ -111,17 +140,17 @@ var extractTitle = function(line, match) {
 
 // get page (string, integer)
 // make api call for the specified page
-var getPage = function(monthDay, time) {
-	client.getArticle(
-		monthDay,
-		function(err, data) {
+var getPage = function(currentDay, monthIndex, currentTime) {
+	client.getArticle(months[monthIndex].monthName + '_' + currentDay,
+		function(err, response) {
 			// error handling
+			//console.log(response)
 			if (err) {
-				console.error(monthDay + ' Download Failed');
-				eventEmitter.emit('nextDay');
+				console.error(currentDay + ' Download Failed');
+				eventEmitter.emit('nextDay', currentDay, monthIndex, currentTime);
 				return err;
 			}
-			processResponse(data, time, monthDay);
+			processResponse(response, currentDay, monthIndex, currentTime);
 		}
 	);
 }
@@ -131,21 +160,26 @@ var getPage = function(monthDay, time) {
 	the arrays of promises.
 	emit event when all promises are completed
 */
-var processResponse = function(text, time, day) {
+var processResponse = function(text, currentDay, monthIndex, currentTime) {
 	var promises = [];
+	var pageProperties = {
+		currentDay: months[monthIndex].monthName + '_' + currentDay,
+		currentCategory: undefined,
+		currentTime: currentTime
+	};
 	textLines = text.split('\n');
 	for (var lineIndex in textLines) {
-			parseLine(textLines[lineIndex], day, time, promises);
+			parseLine(textLines[lineIndex], pageProperties, promises);
 	}
 	Promise.all(promises)
 		.then(function(data){
-			console.log(day + " completed");
-			eventEmitter.emit('nextDay');
+
+			console.log(months[monthIndex].monthName + '_' + currentDay + " completed");
+			eventEmitter.emit('nextDay', currentDay, monthIndex, currentTime);
 		})
 		.catch(function(err) {
 			console.log(day + " failed");
-			console.log(err);
-			eventEmitter.emit('nextDay');
+			eventEmitter.emit('nextDay', currentDay, monthIndex, currentTime);
 		})
 };
 
@@ -155,7 +189,10 @@ var processResponse = function(text, time, day) {
 	category, calls the WikipediaStore to insert a new category
 	entry in database
 */
-var parseLine = function(line, day, time, promises) {
+
+
+//finish this function in the morning.
+var parseLine = function(line, pageProperties, promises) {
 	var match = categoryRegexPattern.exec(line);
 
 	// if it is a category
@@ -163,40 +200,93 @@ var parseLine = function(line, day, time, promises) {
 		var readCategory = match[1].replace(removeWhiteSpaces, '');
 		// check if it's a desired category
 		if (categories.indexOf(readCategory) > -1) {
-			currentCategory = readCategory.toLowerCase(); // another strinng
+			pageProperties.currentCategory = readCategory.toLowerCase(); // another strinng
 		} else {
-			currentCategory = undefined;
+			pageProperties.currentCategory = undefined;
 		}
 	} else {
 		// if it is a category entry
-		if (!currentCategory) {
+		if (!pageProperties.currentCategory) {
 			return;
 		}
 		match = entryRegexPattern.exec(line);
-		if (match !== null && currentCategory) {
+		if (match !== null && pageProperties.currentCategory) {
 			//extract year
 			var year = match[1].replace(bracketsRemove, '')
 				.replace(removeWhiteSpaces, '').trim();
 			//extract title
 			var title = extractTitle(line, match);
 			// add another promise
-			promises.push(dbStore.insertInCategory(currentCategory, title, day,
-				time, year));
+			promises.push(dbStore.insertInCategory(pageProperties.currentCategory,
+				title, pageProperties.currentDay, pageProperties.currentTime,	year));
 		} else {
-			if (!currentCategory) {
+			if (!pageProperties.currentCategory) {
 				return;
 			}
 			// it it is a Holidays and Observances entry
 			match = holidayRegexPattern.exec(line);
-			if (match !== null && currentCategory) {
+			if (match !== null && pageProperties.currentCategory) {
 				//extract title
 				var title = extractTitle(line, match);
-				promises.push(dbStore.insertInCategory(currentCategory, title, day,
-					time));
+				promises.push(dbStore.insertInCategory(pageProperties.currentCategory,
+					title, pageProperties.currentDay, pageProperties.currentTime));
 			}
 		}
 	}
 };
+
+
+// -------Events handlers -------------
+// next day event handler
+// if it's the last day of year, December_31 then close fire
+// fetchedCompleted event
+eventEmitter.on('nextDay', function	(currentDay, monthIndex, currentTime) {
+	if (currentDay >= months[monthIndex].monthDaysNumber) {
+		if (monthIndex === months.length-1) {
+
+			getLastUpdateTime(startTime)
+				.then(function(time){
+					eventEmitter.emit('cleanUp', 0, time);
+				})
+			return;
+		}
+		else {
+			monthIndex ++;
+			currentDay = 1;
+		}
+	}
+	else {
+		currentDay ++;
+	}
+	getPage(currentDay, monthIndex, currentTime);
+});
+
+eventEmitter.on('cleanUp', function(categoryIndex, oldTime) {
+
+	if(categoryIndex >= 4 || oldTime === undefined) {
+		eventEmitter.emit('fetchCompleted');
+		return;
+	}
+
+	dbStore.cleanUpCategory(categories[categoryIndex], oldTime)
+		.then(function(removedItems) {
+			console.log('Clean up ' + categories[categoryIndex] + 'completed');
+			eventEmitter.emit('cleanUp',categoryIndex + 1, oldTime);
+		})
+		.catch(function(error) {
+			console.log('Clean up ' + categories[categoryIndex] + 'failed');
+			eventEmitter.emit('cleanUp',categoryIndex + 1, oldTime);
+		});
+});
+
+// close db connection and finish script
+eventEmitter.on('fetchCompleted', function() {
+	console.log('Database fetched completed!');
+	db.closeConnection();
+	var finishTime = getCurrentTime();
+	console.log((finishTime - startTime) / 1000);
+	process.exit(0);
+});
 
 
 if (!module.parent) {
@@ -207,42 +297,11 @@ if (!module.parent) {
 
 	console.log('Database fetch started');
 
-	// next day event handler
-	// if it's the last day of year, December_31 then close fire
-	// fetchedCompleted event
-	eventEmitter.on('nextDay', function	() {
-		if (currentDay >= months[monthIndex].monthDaysNumber) {
-			if (currentMonth === months[months.length-1].monthName) {
-				eventEmitter.emit('fetchCompleted');
-				return;
-			}
-			else {
-				monthIndex ++;
-				currentMonth = months[monthIndex].monthName;
-				console.log(currentMonth);
-				currentDay = 1;
-			}
-		}
-		else {
-			currentDay ++;
-		}
-		getPage(currentMonth + '_' + currentDay);
-	});
-
-	// close db connection and finish script
-	eventEmitter.on('fetchCompleted', function() {
-		console.log('Database fetched completed!');
-		db.closeConnection();
-		var finishTime = getCurrentTime();
-		console.log((finishTime - startTime) / 1000);
-		process.exit(0);
-	});
-
 	// connect to db
 	db.connect()
 		.then(function(dbInstance) {
 			dbStore = WikipediaStore(dbInstance);
-			eventEmitter.emit('nextDay');
+			eventEmitter.emit('nextDay', 30, 11, startTime);
 		})
 		.catch(function(err){
 			console.log('err');

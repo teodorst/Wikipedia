@@ -2,9 +2,19 @@ var WikipediaCollections 	= require('../collections/WikipediaCollections.js');
 
 var collections = undefined;
 
-var removeExtraData = function(result) {
 
-};
+var createUpdatedObject = function(category, title, day, time, year) {
+	var updatedObject = {
+		category: category,
+		title: title,
+		day: day,
+		updated: time
+	};
+	if(year) {
+		updatedObject['year'] = year;
+	}
+	return updatedObject;
+}
 
 // create query object for find
 var createQueryObject = function(day, year, keyword) {
@@ -18,7 +28,6 @@ var createQueryObject = function(day, year, keyword) {
 	if (keyword) {
 		queryObj['title'] = {"$regex": keyword , "$options": "i" };
 	}
-	console.log(queryObj);
 	return queryObj;
 };
 
@@ -27,13 +36,8 @@ var createQueryObject = function(day, year, keyword) {
 var wikipediaStore = {
 	// insert database
 	insertInCategory: function(category, title, day, time, year) {
-		var updatedObject = {
-			title: title,
-			day: day,
-			year: year,
-			category: category,
-			updated: time
-		};
+		var updatedObject = createUpdatedObject(category, title, day, time, year);
+
 		// if year exists then it's not a holiday
 		if (year) {
 			return collections[category].update({
@@ -99,12 +103,18 @@ var wikipediaStore = {
 				})
 		});
 	},
-	clearCollections: function () {
-		// soon
-		// WikipediaModels['Events'].remove();
-		// WikipediaModels['Deaths'].remove();
-		// WikipediaModels['Births'].remove();
-		// //WikipediaModels[''].remove({});
+	cleanUpCategory: function (category, oldTime) {
+		return new Promise(function(resolve, reject) {
+			collections[category.toLowerCase()].deleteMany(
+				{ updated: { "$lte" : oldTime} }
+			)
+				.then(function(results) {
+					resolve(results.deletedCount);
+				})
+				.catch(function(err){
+					reject(err);
+				});
+		});
 	}
 };
 
