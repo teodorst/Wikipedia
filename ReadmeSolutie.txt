@@ -83,7 +83,7 @@ pot risca sa raman fara un set de date valid. O solutie ar mai fi sa fac o copie
  a bazei de date, o data pe zi/saptamana.
 
     Am facut docker-compose-ul, care presupune rularea unei bazei de date si a
-scriptului in containere diferite.
+serverului + scriptului in containere diferite.
 
 
 Python:
@@ -118,5 +118,6 @@ DB plin:
 
 
 Va multumesc din nou pentru "tema", a fost foarte interesanta si ca o prima
-imbunatatire, o sa fac un script care sterge datele care nu au mai fost actua-
-liza-te.
+imbunatatire, dupa ce se face fetch la baza de date, se sterg toate entitatile
+care au data adaugarii mai mica decat ultima data cand a fost fetch-uita baza
+de date. Am folosit un fisier de log pentru asta, numit timelog.txt. 
